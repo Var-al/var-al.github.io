@@ -1,5 +1,5 @@
 <div class="sidebar ">
-  <h2>Recent Posts</h2>
+  <h2>近期发布</h2>
   <ul>
     {% for post in site.posts limit:5 %}
     <li><a href="{{ post.url | relative_url }}">{{ post.title }}</a></li>
