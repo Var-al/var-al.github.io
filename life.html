@@ -1,12 +1,12 @@
 ---
 layout: page
-title: Blog
+title: Beer
 ---
 <div class="page-content wc-container">
 	<div class="post">
-		<h1>Blog</h1>  
+		<h1>Life</h1>  
 		{% for post in site.posts %}
-			{% if post.categories contains "blog" %}
+			{% if post.categories contains "life" %}
 				{% capture currentyear %}{{post.date | date: "%Y"}}{% endcapture %}
 				{% if currentyear != year %}
 					{% unless forloop.first %}</ul>{% endunless %}
