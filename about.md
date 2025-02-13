@@ -24,7 +24,7 @@ A Unity Whisperer 🤖 | Code, Craft Beer & Cocktail Deconstructor 🥃
 
 🔥 混沌发生器（近期企划）
 𐄷 《酒精编译器》
-在Unity建虚拟酒吧，NPC根据代码风格推荐饮品：
+在Unity建虚拟酒吧，NPC根据代码风格推荐饮品： 
 if (代码=="暴躁") 生成尼格罗尼；
 else 弹出巧克力世涛+后摇BGM
 
