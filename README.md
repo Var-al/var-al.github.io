@@ -1,71 +1,41 @@
-Jekyll Clean Dark
-============
+Hey! I’m Veyne
+A Unity Whisperer 🤖 | Code, Craft Beer & Cocktail Deconstructor 🥃
 
-<p align="center">
-   <img alt="GitHub stars" src="https://img.shields.io/github/stars/streetturtle/jekyll-clean-dark">
-   <img alt="GitHub forks" src="https://img.shields.io/github/forks/streetturtle/jekyll-clean-dark">
- <img alt="Twitter URL" src="https://img.shields.io/twitter/url?url=https%3A%2F%2Fgithub.com%2Fstreetturtle%2Fjekyll-clean-dark">
-</p>
+🎮 代码次元（用BUG酿酒，用逻辑写诗）
+▫️ 将BUG炼成彩蛋，用Shader模拟啤酒泡沫的宿醉美学
+▫️ 近期暴走：让AI把NullReferenceException编成蓝调布鲁斯
+▫️ 终极妄想：在虚拟酒吧用C#生成会冒冷凝水的马天尼
 
-Dark and Clean Jekyll theme which is easy to customize!
+🍻 生活次元（后摇、酒精与篮球的混沌方程）
+▫️ 声音暴力：写代码必听Mogwai，打篮球颅内播放《黑客帝国》子弹时间Remix
+▫️ IPA苦度=上帝写的Unit Test，精酿配方是物质世界的Git提交记录
+▫️ 鸡尾酒黑客：用git rebase重构Negroni迭代史（配方v1.2：git rebase -Gin 30ml -Sweet Vermouth 30ml -Campari 30ml）
+▫️ 开发“后摇音浪抛物线优化器”（播放Explosions in the Sky时命中率+15%）
 
-* Get it from [github](https://github.com/streetturtle/jekyll-clean-dark).
-* See the [live demo](http://pavelmakhov.com/jekyll-clean-dark).
-* See it [in action on my own blog](http://pavelmakhov.com).
-* Easily [customizable](http://pavelmakhov.com/jekyll-clean-dark/2016/09/customizations)
+🔥 高危实验报告
+𐄷 《酒精编译器》
+在Unity建虚拟酒吧，NPC根据代码风格推荐饮品：
+if (代码=="暴躁") 生成尼格罗尼；
+else 弹出巧克力世涛+后摇BGM
 
-![preview1](./assets/images/preview1.jpg)
-![preview2](./assets/images/preview2.jpg)
-![preview3](./assets/images/preview3.jpg)
+𐄷 《篮球场逆向工程》
+开发“后摇音浪投篮算法”：播放Explosions in the Sky时抛物线自动+15%优雅度
+用Unity重现实战数据：论证“打铁声是物理模拟的灵魂ASMR”
 
-This theme uses some parts of Twitter Bootstrap, which allows it to look nice on a mobile devices using a collapsable nav bar and hiding the
-sidebar.
+🚨 生活企划
+⚠️ 技术性酗酒
+《协程(Coroutine)和精酿发酵周期的暧昧关系》
+《如何用Shader让虚拟马天尼产生冷凝水珠（附带现实酒杯崩溃对照实验）》
 
-Some cool features:
+⚠️ 液体暴力美学
+“喝三杯IPA后，我解开了递归与摇酒壶的拓扑学同构”
+“用C#代码风格重构鸡尾酒配方：Old Fashioned = 40% 单一麦芽类 + 30% 糖浆接口 + 30% 苦精异常处理”
 
- - [Disqus](http://disqus.com) as a comments system;
- - [Google Analytics](http://www.google.com/analytics/);
- - [Yandex Metrica](http://metrica.yandex.com);
- - Blog tags - check the section below;
- - [Share buttons](http://pavelmakhov.com/jekyll-clean-dark/2016/09/be-social);
- - [Table Of Content](http://pavelmakhov.com/jekyll-clean-dark/2018/08/table-of-content);
- - Bootstrap 4 and FontAwesome 5!
- - [Stats page](http://pavelmakhov.com/jekyll-clean-dark/stats) - WIP
+⚠️ 声波污染
+《把篮球拍地声、摇冰声、键盘敲击声合成工业后摇》
+《MIDI信号控制Unity粒子系统：将专辑《饮醉代码》视觉化成一杯赛博酸啤》
 
-All these features could be set up in `_config.yml`. Also you can have social icons which could lead to your social profiles. It uses [font-awesome](http://fontawesome.io/), so you can have any icon you want to any social profile. Out-of-the box it has: LinkedIn, GitHub, StackOverflow, LastFm, Instagram. And you can easily add more by adding new style in `theme.css` and setting it in `_config.yml`.
-
-Installation
-============
-
-If you don't have your own blog you can clone this repository and put your articles in a `_posts` folder.
-If you already have your own blog then I think you can clone this repository and copy-paste content keeping your `_posts` folder.
-
-After you will have to set up your `_config.yml`
-
-I tried to setup gem installation, but it doesn't work well as theme has many customizations. So I wouldn't recommend to use gem.
- 
-Blog tags
-=========
-
-To use this feature you simply will need to create a markdown file for each tag which you are using in you site in **tag** folder. To simplify this procedure there is an [/admin](http://pavelmakhov.com/jekyll-clean-dark/admin.html) page, which outputs the bash command which you just need to run inside **tag** folder of your site. Also don't forget to rerun it when you add a post with new tag.
-
-License
-=======
-
-The content of this theme is distributed and licensed under a
-[Creative Commons Attribution 4.0 License](https://creativecommons.org/licenses/by/4.0/legalcode)
-
-    This license lets others distribute, remix, tweak, and build upon your work,
-    even commercially, as long as they credit you for the original creation. This
-    is the most accommodating of licenses offered. Recommended for maximum
-    dissemination and use of licensed materials.
-
-In other words: you can do anything you want with this theme on any site, just please
-provide a link to the original theme on github.
-
-This theme includes the following files which are the properties of their
-respective owners:
-
-* js/bootstrap.min.js - [bootstrap](http://getbootstrap.com)
-* css/bootstrap.min.css - [bootstrap](http://getbootstrap.com)
-* js/jquery.min.js - [jquery](https://jquery.com)
+Slogan：
+“在BUG与酒精的量子纠缠中，
+打捞世界的隐藏参数——
+建议搭配一首《III》和一杯浑浊IPA食用”
