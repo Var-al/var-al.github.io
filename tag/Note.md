@@ -1,4 +1,4 @@
 ---
 layout: tag_index
-tag: Reading Notes 
+tag: Note
 ---
