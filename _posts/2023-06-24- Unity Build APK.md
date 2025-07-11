@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Unity Build APK
-date:   2025-06-22 17:48
+date:   2023-06-22 17:48
 description: Unity 打APK记录
 toc: true
 comments: false
@@ -13,14 +13,14 @@ tags:
 
 从两个角度详细说明：**1. Unity 直接打包 APK (默认方式)** 和 **2. 导出 Android Studio 项目再打包 (Export Project)**。并比较它们的异同、流程和所需设置。
 
-**核心概念解析 (工具链是干嘛的？)**
+## **核心概念解析 (工具链是干嘛的？)**
 
-在开始流程之前，我们先搞清楚打包过程中涉及到的几个关键组件及其作用：
+打包过程中涉及到的几个关键组件及其作用：
 
 1.  **JDK (Java Development Kit):**
-    *   **作用:** 编译你 Unity 项目中包含的 Java 代码（比如 Android Plugin 或 Unity 自动生成的部分代码）。它提供了 `javac` (Java 编译器) 等工具。
+    *   **作用:** 编译 Unity 项目中包含的 Java 代码（比如 Android Plugin 或 Unity 自动生成的部分代码）。它提供了 `javac` (Java 编译器) 等工具。
     *   **Unity 如何使用它:** Unity 需要 JDK 来将 `.java` 文件编译成 `.class` 文件（Java 字节码）。这个字节码之后会被转换为 Android 虚拟机理解的格式 (.dex)。
-    *   **位置:** 通常由 Unity Hub 自动安装 (Unity 2020+ 推荐使用内置的或指定的版本)，你可以在 Unity 的 `Edit -> Preferences -> External Tools` 中配置其路径。`%JAVA_HOME%` 环境变量有时也需要设置。
+    *   **位置:** 通常由 Unity Hub 自动安装 (Unity 2020+ 推荐使用内置的或指定的版本)，可以在 Unity 的 `Edit -> Preferences -> External Tools` 中配置其路径。`%JAVA_HOME%` 环境变量有时也需要设置。
     *   **常见版本:** Java 8, Java 11 (Unity 2020 LTS+ 推荐), 偶尔需要 Java 17+。**关键点：Unity 版本、Android Gradle Plugin版本、Gradle 版本、JDK 版本相互之间需要兼容！** Unity 会指定可用的版本范围。
 
 2.  **Android SDK (Software Development Kit):**
@@ -35,24 +35,24 @@ tags:
 
 3.  **NDK (Native Development Kit):**
     *   **作用:** 用于编译 C/C++ 代码为 Android 本地库 (`.so` 文件)。
-    *   **Unity 如何使用它:** 当你在 Player Settings 中选择 `IL2CPP` 后端编译选项，或者项目使用了需要编译的本地插件 (.a 或 .so) 时，Unity 需要 NDK 来编译 C++ 代码（IL2CPP 将 C#/IL 代码转换为 C++ 代码）。
+    *   **Unity 如何使用它:** 当在 Player Settings 中选择 `IL2CPP` 后端编译选项，或者项目使用了需要编译的本地插件 (.a 或 .so) 时，Unity 需要 NDK 来编译 C++ 代码（IL2CPP 将 C#/IL 代码转换为 C++ 代码）。
     *   **位置:** 可由 Unity Hub 自动下载安装（强烈推荐），或手动配置路径 (`Edit -> Preferences -> External Tools`)。**版本要求非常高！** Unity 每个版本通常指定唯一兼容的 NDK 版本。用错版本几乎必然导致编译失败。
 
 4.  **Gradle:**
     *   **作用:** 一个强大的项目构建自动化工具。它基于 Groovy 或 Kotlin DSL 脚本 (`build.gradle`) 定义项目如何构建、依赖哪些库、如何打包、签名等。
     *   **Unity 如何使用它:**
         *   **Unity 2018.1+ 的默认 Android 构建系统：** Unity 内部集成了特定版本的 Gradle 和 Android Gradle Plugin (AGP)。它生成必要的 `build.gradle` 文件，然后**调用它自己的内置 Gradle Wrapper** 去执行整个构建过程。**这是 `Gradle (Installed)` 选项通常不需要勾选的原因！** Unity 管理一切。
-        *   **`Gradle (Installed)` 选项：** 如果勾选此选项 (`Build Settings` -> `Build System` 为 `Gradle`，然后勾选 `Export Project` 下方的 `Gradle (Installed)`，或在 `Player Settings -> Publishing Settings` 中找到)，Unity 会使用你系统环境变量 `PATH` 中配置的系统级 Gradle 命令 (`gradle` 或 `gradlew`) 来执行构建，**而不是**它内置的 Gradle。**除非你有特殊需求（如需要使用系统 Gradle 的特定版本或插件），否则不建议手动勾选此选项并管理自己的 Gradle 环境，用 Unity 内置的就行。**
-        *   **Export Project:** 导出为 Android Studio 项目时，项目会自带一个 `gradle/wrapper/gradle-wrapper.properties` 文件，里面指定了项目**需要**的 Gradle 版本。当你用 Android Studio 打开项目或执行 `gradlew` 命令时，它会自动下载该指定版本的 Gradle 到本地缓存 (如果尚未下载)。Android Studio 也允许你配置使用本地已安装的系统级 Gradle (`File -> Settings -> Build, Execution, Deployment -> Gradle`)。
+        *   **`Gradle (Installed)` 选项：** 如果勾选此选项 (`Build Settings` -> `Build System` 为 `Gradle`，然后勾选 `Export Project` 下方的 `Gradle (Installed)`，或在 `Player Settings -> Publishing Settings` 中找到)，Unity 会使用系统环境变量 `PATH` 中配置的系统级 Gradle 命令 (`gradle` 或 `gradlew`) 来执行构建，**而不是**它内置的 Gradle。**除非有特殊需求（如需要使用系统 Gradle 的特定版本或插件），否则不建议手动勾选此选项并管理自己的 Gradle 环境，用 Unity 内置的就行。**
+        *   **Export Project:** 导出为 Android Studio 项目时，项目会自带一个 `gradle/wrapper/gradle-wrapper.properties` 文件，里面指定了项目**需要**的 Gradle 版本。当用 Android Studio 打开项目或执行 `gradlew` 命令时，它会自动下载该指定版本的 Gradle 到本地缓存 (如果尚未下载)。Android Studio 也允许配置使用本地已安装的系统级 Gradle (`File -> Settings -> Build, Execution, Deployment -> Gradle`)。
 
 5.  **Android Gradle Plugin (AGP):**
     *   **作用:** Gradle 的一个插件，专门用于构建 Android 应用。它定义了构建 Android APK 的特定任务 (task)，如 `:app:assembleDebug`, `:app:assembleRelease`。
     *   **Unity 如何使用它:** Unity 在生成 Gradle 项目 (无论是内部构建还是导出项目) 时，会在 `build.gradle` 文件中指定 `com.android.tools.build:gradle:版本号` 依赖。这个版本由 Unity 版本严格控制。
-    *   **版本关键性:** Unity 版本会锁定兼容的 AGP 版本。如果 Unity 生成的项目指定用 AGP 7.4.x，但你强制 Android Studio 使用 AGP 8.x 去构建，很可能失败。
+    *   **版本关键性:** Unity 版本会锁定兼容的 AGP 版本。如果 Unity 生成的项目指定用 AGP 7.4.x，但强制 Android Studio 使用 AGP 8.x 去构建，很可能失败。
 
 ---
 
-**一、Unity 直接构建 APK (Build and Run / Build)**
+## **一、Unity 直接构建 APK (Build and Run / Build)**
 
 **目标：** 在 Unity Editor 内一键生成可直接安装到设备的 `.apk` 文件。
 
@@ -115,7 +115,7 @@ tags:
         *   打开 Unity Editor。
         *   转到 `Edit -> Preferences -> External Tools`。
         *   **如果 Unity Hub 安装了组件：** 这些路径通常会自动设置好（路径如 `%USERPROFILE%\AppData\Local\UnityHub\Editor\<Version>\Editor\Data\PlaybackEngines\AndroidPlayer\` 的子目录）。**优先使用这个自动安装的路径！**
-        *   **如果手动安装或使用已有路径：** 点击对应字段旁边的 `Browse` (...)，选择你的 JDK (如果非自动), Android SDK, NDK 目录。**强烈建议通过 Hub 安装以避免冲突和兼容性问题。**
+        *   **如果手动安装或使用已有路径：** 点击对应字段旁边的 `Browse` (...)，选择的 JDK (如果非自动), Android SDK, NDK 目录。**强烈建议通过 Hub 安装以避免冲突和兼容性问题。**
     *   **Player Settings:** (最重要！)
         *   打开 `Edit -> Project Settings -> Player`。
         *   **Icon:** 设置各种尺寸的应用图标。
@@ -157,18 +157,18 @@ tags:
 
 4.  **Unity 调用 Gradle:**
     *   完成自身的资源处理、C#编译和（如果是 IL2CPP）C++代码生成/编译后，Unity 会：
-        *   将所有必要文件（资产、资源、编译好的库、AndroidManifest.xml、Unity Player Java Stub 代码、你的或插件的 Java 代码）复制到一个临时目录，并将其组织成一个符合 Android Gradle 项目结构（`src/main`）的目录。
-        *   **内部 Gradle:** Unity 使用其**内置捆绑**的 Gradle Wrapper (`gradlew` 命令) 来构建这个临时的 Gradle 项目。它使用了 Unity 控制的 **Android Gradle Plugin (AGP)** 和 **Gradle 版本**。你通常不需要关心。
-        *   **系统 Gradle:** 如果你强制勾选了 `Gradle (Installed)` 并配置了系统 PATH，Unity 会调用系统的 `gradle` 命令。这时你需要确保系统 Gradle 版本、AGP 版本（由 Unity 的 `build.gradle` 模板指定）完全兼容，否则**大概率失败**。**不推荐**新手使用。
+        *   将所有必要文件（资产、资源、编译好的库、AndroidManifest.xml、Unity Player Java Stub 代码、的或插件的 Java 代码）复制到一个临时目录，并将其组织成一个符合 Android Gradle 项目结构（`src/main`）的目录。
+        *   **内部 Gradle:** Unity 使用其**内置捆绑**的 Gradle Wrapper (`gradlew` 命令) 来构建这个临时的 Gradle 项目。它使用了 Unity 控制的 **Android Gradle Plugin (AGP)** 和 **Gradle 版本**。通常不需要关心。
+        *   **系统 Gradle:** 如果强制勾选了 `Gradle (Installed)` 并配置了系统 PATH，Unity 会调用系统的 `gradle` 命令。这时需要确保系统 Gradle 版本、AGP 版本（由 Unity 的 `build.gradle` 模板指定）完全兼容，否则**大概率失败**。**不推荐**新手使用。
     *   Gradle 任务链启动，调用 JDK (`javac`) 编译 Java 代码，调用 Android SDK 工具 (`d8`, `aapt2`, `zipalign`, `apksigner`) 将 `.class` 转换为 `.dex`、打包资源、合并最终 APK 组件、签名和对齐。
 
 5.  **输出 APK:**
-    *   经过上述步骤，最终生成的 `.apk` 文件会输出到你指定的目录。
+    *   经过上述步骤，最终生成的 `.apk` 文件会输出到指定的目录。
     *   如果勾选了 `Build And Run` 并且设备已连接且选择正确，APK 会自动安装到设备并启动。
 
 ---
 
-**二、导出 Android Studio 项目后再打包 (Export Project)**
+## **二、导出 Android Studio 项目后再打包 (Export Project)**
 
 **目标：** Unity 将项目导出为一个标准的 Android Gradle 项目结构，然后开发者可以在 Android Studio 中打开、修改配置、添加原生代码或插件、使用 Gradle 命令行或 Android Studio GUI 最终构建 APK/AAB。
 
@@ -212,7 +212,7 @@ tags:
 |      ├── src/main/           <-- 核心Android项目结构              |
 |      │   ├── AndroidManifest.xml                                 |
 |      │   ├── assets/         <-- Unity的Assets文件夹内容          |
-|      │   ├── java/           <-- Unity生成的Java代码 + 你的插件Java代码
+|      │   ├── java/           <-- Unity生成的Java代码 + 的插件Java代码
 |      │   ├── jniLibs/        <-- IL2CPP生成的.so或插件的本地库     |
 |      │   └── res/            <-- Unity Player所需资源 (已处理)    |
 |      └── libs/               <-- 可能包含的jar/aar库              |
@@ -252,8 +252,8 @@ tags:
     *   同样需要在 Player Settings 中配置包名、版本号、图标、启动画面、脚本后端、目标架构等。
     *   **关键差异：**
         *   在 `Build Settings` 窗口中，**必须勾选 `Export Project` 选项！**
-        *   配置 `Keystore` **不是必须在这里完成的**！因为签名通常在 Android Studio 的模块级 `build.gradle` 文件中配置（推荐方式，更符合原生开发习惯）。你可以在 Unity 的 Player Settings 里配，也可以不配（留空）后面在 Android Studio 里配。
-        *   对于`Minify`和`Split Application Binary`等设置，Unity 会生成相应配置，但你也可以在 Android Studio 的 `build.gradle` 中更精确地控制。
+        *   配置 `Keystore` **不是必须在这里完成的**！因为签名通常在 Android Studio 的模块级 `build.gradle` 文件中配置（推荐方式，更符合原生开发习惯）。可以在 Unity 的 Player Settings 里配，也可以不配（留空）后面在 Android Studio 里配。
+        *   对于`Minify`和`Split Application Binary`等设置，Unity 会生成相应配置，但也可以在 Android Studio 的 `build.gradle` 中更精确地控制。
 
 2.  **导出项目:**
     *   点击 `Build Settings` 中的 `Export` 按钮（不是 Build!）。
@@ -271,13 +271,13 @@ tags:
         *   这个同步过程需要稳定的网络连接，完成后状态栏应提示 "Gradle project sync completed"。
     *   **验证/修复项目:**
         *   **检查 JDK:** AS 有自己的 JDK 设置 (`File -> Project Structure -> SDK Location`)。确保它使用的是兼容的 JDK (通常推荐 Android Studio 自带的 JDK 或系统兼容版本)。
-        *   **检查 NDK & SDK:** 正常情况下，AS 会读取 `local.properties` 文件中的 `sdk.dir` 和 `ndk.dir`（由 Unity 生成），并使用这些路径。确保路径有效且包含了所需的 SDK Platform、Build-Tools 和 NDK。如果 `local.properties` 内容不正确或缺失，你**需要手动创建或编辑它** (在项目根目录下)。格式如：
+        *   **检查 NDK & SDK:** 正常情况下，AS 会读取 `local.properties` 文件中的 `sdk.dir` 和 `ndk.dir`（由 Unity 生成），并使用这些路径。确保路径有效且包含了所需的 SDK Platform、Build-Tools 和 NDK。如果 `local.properties` 内容不正确或缺失，**需要手动创建或编辑它** (在项目根目录下)。格式如：
             ```
             sdk.dir = C:\\Path\\To\\Your\\Android\\Sdk
             ndk.dir = C:\\Path\\To\\Your\\Android\\Ndk
             ```
         *   **查看模块级 `build.gradle`:** 进入 `[UnityProjectName]` (通常是 `launcher`) 模块，打开 `build.gradle` (`Module: [UnityProjectName].main`)。检查 AGP 版本、`minSdk`、`targetSdk`、`versionCode`、`versionName`。**最重要的配置步骤在此：**
-            *   **签名配置 (`signingConfigs`):** 在这里配置你的 Release 签名密钥。**强烈推荐在此配置**，而不是依赖 Unity 的 Player Settings 里设置的签名文件路径。示例：
+            *   **签名配置 (`signingConfigs`):** 在这里配置的 Release 签名密钥。**强烈推荐在此配置**，而不是依赖 Unity 的 Player Settings 里设置的签名文件路径。示例：
                 ```groovy
                 android {
                     signingConfigs {
@@ -298,7 +298,7 @@ tags:
                 }
                 ```
             *   **构建类型 (`buildTypes`):** 定义 debug 和 release（及可自定义的其他类型）。可以在不同类型中启用/禁用 minify (`minifyEnabled`)、应用不同的签名配置、设置不同的优化选项等。
-            *   **依赖项 (`dependencies`):** Unity 会自动添加对 `unityLibrary` 模块（如果你导出了多个模块）和 Unity 运行时库的依赖。你可以在这里添加你自己的原生库依赖 (`implementation` / `api`)。
+            *   **依赖项 (`dependencies`):** Unity 会自动添加对 `unityLibrary` 模块（如果导出了多个模块）和 Unity 运行时库的依赖。可以在这里添加自己的原生库依赖 (`implementation` / `api`)。
         *   **修改 `AndroidManifest.xml`:** 如果需要添加新的权限、服务、活动属性、元数据等，修改 `src/main/AndroidManifest.xml` 文件。注意不要破坏 UnityPlayerActivity 的设置。
         *   **添加原生代码 (可选):** 可以在 `src/main/java` 或 `src/main/kotlin` 添加 Java/Kotlin 代码，在 `src/main/cpp` 添加原生 C/C++ 代码（需配置 CMake/ndk-build）。可以添加原生模块或插件。
 
@@ -313,26 +313,26 @@ tags:
             *   `gradlew.bat assembleDebug` (Debug APK) - Windows
             *   `./gradlew assembleRelease` (Unsigned Release APK)
             *   `./gradlew bundleRelease` (Unsigned Release AAB / App Bundle)
-            *   如果你在 `build.gradle` 中配置了 `signingConfigs` (如上所示)，并且构建类型设置为使用该配置 (`signingConfig signingConfigs.release`)，那么 `assembleRelease` 和 `bundleRelease` **会输出带签名的包**！
+            *   如果在 `build.gradle` 中配置了 `signingConfigs` (如上所示)，并且构建类型设置为使用该配置 (`signingConfig signingConfigs.release`)，那么 `assembleRelease` 和 `bundleRelease` **会输出带签名的包**！
 
 ---
 
-**三、两种方式的核心对比**
+## **三、两种方式的核心对比**
 
-| 特性               | Unity 直接打包 (Build APK)                                | 导出项目到 Android Studio 再打包 (Export Project)                 |
-| :----------------- | :-------------------------------------------------------- | :------------------------------------------------------------- |
-| **主要目的**       | 快速生成最终 APK，无需额外工具链知识，适合纯 Unity 内容项目 | 需要深度定制原生层 (Java/Kotlin/C++)、修改 AGP 配置、添加原生插件、构建多风味 App Bundle、集成原生服务或使用 Android Studio 强大的调试分析工具。 |
-| **构建执行者**     | Unity Editor (调用内部或系统 Gradle/JDK/SDK)               | 开发者使用 Android Studio (或命令行) 调用项目中的 Gradle Wrapper (使用本地或缓存 Gradle) |
-| **Gradle 控制权**  | Unity 控制 AGP 版本、Gradle 版本。开发者有限配置。         | **开发者完全控制** AGP 版本（可通过 Gradle 脚本指定，但要与Unity兼容）、Gradle 版本（通过 Wrapper 文件）。可以在 `build.gradle` 中精细配置几乎所有原生构建选项，添加插件和任务。 |
-| **签名管理**       | 通常在 Unity Player Settings 中配置 Keystore。            | **推荐在模块 `build.gradle` 中配置**，更灵活、更符合原生开发流程和安全实践。 |
-| **代码/资源混淆**  | 在 Unity Player Settings 中配置 `Minify`（开启/关闭）。     | 在 AS 模块 `build.gradle` 中配置 `minifyEnabled` 和自定义 ProGuard/R8 规则，控制粒度更细。 |
-| **原生代码集成**   | 相对麻烦，只能添加预编译好的 .jar/.aar/.so 插件。需处理JNI接口。 | **最强大之处！** 可以直接在 AS 项目中添加、修改和调试 Java/Kotlin/C++ 源代码，方便实现复杂原生功能或深度集成第三方SDK。可使用 AS 的原生调试器。 |
-| **App Bundle 生成** | 支持（通过 `Build System = Gradle` 和勾选 `Google Android App Bundle`）。 | **更自然、功能更全的支持。** 在 Android Studio 中构建 Bundle 是标准流程，可以方便地配置 Dynamic Feature Modules。 |
-| **多风味构建**     | 支持有限。                                                | **原生支持。** 在 AS 中可以方便地为不同渠道、支付方式、A/B测试等配置风味（Flavors）及其组合（Build Variants）。 |
-| **项目结构**       | 临时生成，构建完即丢弃或覆盖。无持久性。                  | 导出为完整、持久的 Android Gradle 项目目录。可以被版本控制、重复构建、深度修改。 |
-| **构建速度**       | 相对较快（流程集成度高，无需手动同步）。                  | **首次构建/同步可能慢（需下载Gradle/AGP/依赖），** 后续增量构建速度正常。 |
-| **适用场景**       | 90% 以上的标准 Unity Android 项目，无特殊原生开发需求。     | 需要原生功能扩展（如复杂推送、支付、ARCore深度集成）、自定义AGP配置、集成C++跨平台库、发布到不同渠道需不同配置、生成 App Bundle 或调试原生层问题。 |
-| **`Gradle (Installed)` 角色** | **通常不勾选**（用Unity内置）。勾选则用系统Gradle，需版本严格兼容。 | **不适用**（这个选项只在 Unity 直接调用 Gradle 构建时有效）。导出后，构建由导出的项目自身（`gradlew` 或 AS）管理。 |
+| 特性                          | Unity 直接打包 (Build APK)                                          | 导出项目到 Android Studio 再打包 (Export Project)                                                                           |
+|:----------------------------|:----------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------|
+| **主要目的**                    | 快速生成最终 APK，无需额外工具链知识，适合纯 Unity 内容项目                             | 需要深度定制原生层 (Java/Kotlin/C++)、修改 AGP 配置、添加原生插件、构建多风味 App Bundle、集成原生服务或使用 Android Studio 强大的调试分析工具。                   |
+| **构建执行者**                   | Unity Editor (调用内部或系统 Gradle/JDK/SDK)                           | 开发者使用 Android Studio (或命令行) 调用项目中的 Gradle Wrapper (使用本地或缓存 Gradle)                                                  |
+| **Gradle 控制权**              | Unity 控制 AGP 版本、Gradle 版本。开发者有限配置。                              | **开发者完全控制** AGP 版本（可通过 Gradle 脚本指定，但要与Unity兼容）、Gradle 版本（通过 Wrapper 文件）。可以在 `build.gradle` 中精细配置几乎所有原生构建选项，添加插件和任务。 |
+| **签名管理**                    | 通常在 Unity Player Settings 中配置 Keystore。                         | **推荐在模块 `build.gradle` 中配置**，更灵活、更符合原生开发流程和安全实践。                                                                    |
+| **代码/资源混淆**                 | 在 Unity Player Settings 中配置 `Minify`（开启/关闭）。                    | 在 AS 模块 `build.gradle` 中配置 `minifyEnabled` 和自定义 ProGuard/R8 规则，控制粒度更细。                                              |
+| **原生代码集成**                  | 相对麻烦，只能添加预编译好的 .jar/.aar/.so 插件。需处理JNI接口。                       | **最强大之处！** 可以直接在 AS 项目中添加、修改和调试 Java/Kotlin/C++ 源代码，方便实现复杂原生功能或深度集成第三方SDK。可使用 AS 的原生调试器。                            |
+| **App Bundle 生成**           | 支持（通过 `Build System = Gradle` 和勾选 `Google Android App Bundle`）。 | **更自然、功能更全的支持。** 在 Android Studio 中构建 Bundle 是标准流程，可以方便地配置 Dynamic Feature Modules。                                 |
+| **多风味构建**                   | 支持有限。                                                           | **原生支持。** 在 AS 中可以方便地为不同渠道、支付方式、A/B测试等配置风味（Flavors）及其组合（Build Variants）。                                            |
+| **项目结构**                    | 临时生成，构建完即丢弃或覆盖。无持久性。                                            | 导出为完整、持久的 Android Gradle 项目目录。可以被版本控制、重复构建、深度修改。                                                                    |
+| **构建速度**                    | 相对较快（流程集成度高，无需手动同步）。                                            | **首次构建/同步可能慢（需下载Gradle/AGP/依赖），** 后续增量构建速度正常。                                                                       |
+| **适用场景**                    | 90% 以上的标准 Unity Android 项目，无特殊原生开发需求。                           | 需要原生功能扩展（如复杂推送、支付、ARCore深度集成）、自定义AGP配置、集成C++跨平台库、发布到不同渠道需不同配置、生成 App Bundle 或调试原生层问题。                               |
+| **`Gradle (Installed)` 角色** | **通常不勾选**（用Unity内置）。勾选则用系统Gradle，需版本严格兼容。                       | **不适用**（这个选项只在 Unity 直接调用 Gradle 构建时有效）。导出后，构建由导出的项目自身（`gradlew` 或 AS）管理。                                           |
 
 **共同点和关键配置：**
 
@@ -344,13 +344,13 @@ tags:
 
 **新手建议：**
 
-1.  **优先使用 Unity 直接打包 (Build APK)！** 它简单、快捷、Unity帮你管理大部分复杂性（Gradle、签名配置）。对于大多数游戏项目，这是首选。
-2.  当你不需要做原生开发，但又需要打正式包上架时：
+1.  **优先使用 Unity 直接打包 (Build APK)！** 它简单、快捷、Unity帮管理大部分复杂性（Gradle、签名配置）。对于大多数游戏项目，这是首选。
+2.  当不需要做原生开发，但又需要打正式包上架时：
     *   在 Unity Player Settings (`Publishing Settings`) 中**务必配置好 Keystore** (创建并记住密码!)。可以使用界面下方的 `Keystore Manager`。
     *   使用 `Build System = Gradle`。
     *   确保 `Export Project` **没有勾选**。
     *   点击 `Build` 生成签名好的 `release.apk`。
-3.  **只有在你明确需要以下功能时，才选择导出项目到 Android Studio：**
+3.  **只有在明确需要以下功能时，才选择导出项目到 Android Studio：**
     *   需要在 Android Studio 里写自定义的原生 Java/Kotlin/C++ 代码（不仅仅是引用预编译好的库）。
     *   需要精确控制 Gradle 构建流程（比如添加特定插件、自定义 flavor 维度）。
     *   需要生成 App Bundle (虽然Unity直接也能做，但AS更灵活)。
@@ -370,5 +370,3 @@ tags:
 
 *   用 `Export Project` 选项导出到 Android Studio 的核心目的是 **获得对 Android 原生层（Java/Kotlin/C++ 代码和 Android 构建配置）的完全控制权和开发环境**。
 *   直接 `Build APK` 则是一种在 Unity 内部完成的、封装的、“傻瓜式”的构建方式，牺牲灵活性换取便捷性。
-
-希望这个极其详细的解释能帮助你彻底理解 Unity Android APK 打包的流程、工具作用和两种方式的区别！祝你打包顺利！
