@@ -228,24 +228,27 @@ void EnablePIP() {
 ---
 ### 六、性能优化技巧
 **1. 预算控制：**
-    ```csharp
+
+```csharp
 // 限制同时激活的虚拟相机数量
 CinemachineCore.VirtualCameraCount = 5; 
 ```
+
 1. 精度分级：
-    ```csharp
+```csharp
 // 根据距离降低更新频率
 vcam.m_UpdateInterval = distance > 20f ? 0.2f : 0.05f;
 ```
 1. 碰撞检测优化：
-    ```csharp
+ ```csharp
 var collider = vcam.GetComponent<CinemachineCollider>();
 collider.m_Optimization = ColliderOptimization.FixedCache;
 collider.m_DistanceLimit = 10f; // 最大检测距离
 ```
----
+
 
 ### 七、完整示例：BOSS战镜头系统
+
 ```csharp
 public class BossFightCameraSystem : MonoBehaviour
 {
@@ -296,14 +299,12 @@ public class BossFightCameraSystem : MonoBehaviour
     }
 }
 ```
+
 ### 使用建议：
 1. 快捷键加速调试：
     - 场景视图按 Ctrl+` 显示Cinemachine调试信息
     - Virtual Camera对象上按F切换预览
-2. 版本控制技巧：
-    ```gitignore
-
-###  资源包推荐：
+2. 资源包推荐：
     - Cinemachine Timeline Extensions：专业过场工具
     - Cinemachine Pixel Perfect：2D像素游戏适配
     - Impulse Listener Extension：高级震动控制
