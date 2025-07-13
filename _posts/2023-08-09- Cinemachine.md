@@ -141,24 +141,15 @@ void EnterVehicle() {
 ---
 
 ### 四、镜头混合系统
-** 1. 过渡效果配置**
-|混合类型|适用场景|参数示例|
-|Cut|瞬间切换|Duration:0|
-|EaseInOut|平滑过渡|Duration:1.5s, Curve:Quadratic|
-|Custom|特殊动画|自定义AnimationCurve|
 
-            混合类型
-            适用场景
-            参数示例
-            Cut
-            瞬间切换
-            Duration:0
-            EaseInOut
-            平滑过渡
-            Duration:1.5s, Curve:Quadratic
-            Custom
-            特殊动画
-            自定义AnimationCurve
+** 1. 过渡效果配置**
+
+| 混合类型      | 适用场景 | 参数示例                           |
+|-----------|------|--------------------------------|
+| Cut       | 瞬间切换 | Duration:0                     |
+| EaseInOut | 平滑过渡 | Duration:1.5s, Curve:Quadratic |
+| Custom    | 特殊动画 | 自定义AnimationCurve              |
+
 ```csharp
 // 代码控制优先级
 public void SwitchToCamera(CinemachineVirtualCamera targetCam)
