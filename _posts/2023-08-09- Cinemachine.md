@@ -20,7 +20,87 @@ tags:
 ```
 ---
 
-### 二、Virtual Camera 详解
+**Virtual Camera 详解**
+
+**0. 相机重要属性**
+
+1. Body属性深度解析与实战应用
+
+| Body模式              | 核心功能         | 应用案例                    | 关键参数                                                     |
+|---------------------|--------------|-------------------------|----------------------------------------------------------|
+| Do Nothing          | 完全固定相机位置     | 监控摄像头、静态场景展示            | 无需配置                                                     |
+| Framing Transposer  | 屏幕空间保持目标相对位置 | 2.5D平台游戏（如《奥日与黑暗森林》）    | `m_ScreenX/Y` (目标在画面位置)<br>`m_CameraDistance` (相机距离)     |
+| Hard Lock to Target | 与目标位置完全一致    | 第一人称角色视角<br>物体内部视角      | `Follow Offset` 应设为 `(0,0,0)`                            |
+| Orbital Transposer  | 可变距离+玩家输入控制  | 第三人称RPG（如《巫师3》）         | `m_RecenterToTargetHeading` (自动回中)<br>`m_XAxis` (水平旋转设置) |
+| Tracked Dolly       | 沿预设轨道移动      | 过场动画路径镜头<br>赛车游戏回放      | `m_Path` (轨道路径)<br>`m_PathPosition` (位置进度)               |
+| Transposer          | 世界空间固定偏移     | 俯视角游戏（如《暗黑破坏神》）<br>跟随载具 | `m_FollowOffset` (偏移向量)                                  |
+案例：RPG自由视角配置
+```yaml
+Body: Orbital Transposer
+Follow Offset: (0, 2, -5)    # 角色后方5米，高度2米
+Binding Mode: Lock To Target With World Up
+X Axis:
+  Value Range: 0-360         # 水平360度自由旋转
+  Max Speed: 300             # 鼠标移动速度
+Y Axis: 
+  Value Range: 0.1-0.9       # 垂直角度限制
+```
+2. Aim模式详解与实战配置
+
+| Aim模式                 | 核心功能      | 应用案例              | 关键参数                                                 |
+|-----------------------|-----------|-------------------|------------------------------------------------------|
+| Do Nothing            | 不控制旋转     | 固定镜头场景            | -                                                    |
+| Composer              | 保持目标在画面内  | 动作游戏战斗视角          | `m_DeadZone` (死区范围)<br>`m_SoftZone` (平滑区)            |
+| Group Composer        | 多目标同框     | 多人游戏同屏<br>团体合影镜头  | `m_FrameSize` (画面框定范围)<br>`m_Damping` (平滑度)          |
+| Hard Look At          | 锁定目标至画面中心 | 物品特写展示<br>BOSS聚焦  | `Lookahead` (运动预测)                                   |
+| POV                   | 玩家输入控制旋转  | 第一人称射击            | `m_HorizontalAxis` (水平控制)<br>`m_VerticalAxis` (垂直控制) |
+| Same As Follow Target | 同步目标旋转    | 载具驾驶舱视角<br>跟随旋转物体 | -                                                    |
+
+案例：多人同屏镜头
+```csharp
+public void SetupGroupCamera(Transform[] targets)
+{
+    // 创建目标组
+    var targetGroup = new GameObject("CameraTargets").AddComponent<CinemachineTargetGroup>();
+    foreach(var t in targets) {
+        targetGroup.AddMember(t, 1f, 2f); // 权重1，半径2米
+    }
+
+    // 配置VCam
+    var vcam = GetComponent<CinemachineVirtualCamera>();
+    vcam.LookAt = targetGroup.transform;
+    
+    var composer = vcam.AddCinemachineComponent<CinemachineGroupComposer>();
+    composer.m_MinimumFOV = 40;
+    composer.m_MaximumFOV = 60;
+}
+```
+3. Binding Mode空间绑定深度解析
+
+| 绑定模式                         | 坐标系              | 典型应用          | 视觉表现                 |
+|------------------------------|------------------|---------------|----------------------|
+| Lock To Target On Assign     | 目标本地空间(初始化时)     | 需要精确初始位置的场景   | 相机以目标初始朝向为基准         |
+| Lock To Target With World Up | 目标本地空间(Y轴强制世界向上) | 90%第三人称游戏适用   | Y轴永远垂直向上<br>防止相机翻转   |
+| Lock To Target No Roll       | 目标本地空间(无Z轴旋转)    | 飞行模拟器         | X/Y旋转自由<br>Z轴保持水平    |
+| Lock To Target               | 完全目标本地空间         | 太空游戏<br>无重力环境 | 完全跟随目标旋转             |
+| World Space                  | 世界坐标系            | 战略游戏<br>固定视角  | 偏移固定在世界位置            |
+| Simple Follow With World Up  | 简化本地空间(Y轴世界向上)   | 2D/2.5D游戏     | 类似World Space但Z轴保持跟随 |
+
+案例：空战游戏摄像机配置
+
+```yaml
+Body: Transposer
+Follow Offset: (0, 5, -10)   # 飞机后方10米，上方5米
+
+Aim: POV                     # 玩家自由控制观察
+  Vertical Axis:
+    Max Speed: 2             # 垂直旋转速度
+    Min Value: -90           # 下视角限制
+    Max Value: 90            # 上视角限制
+
+Binding Mode: Lock To Target No Roll # 保持水平不翻转
+```
+
 **1. 基础配置模板**
 ```csharp
 public void SetupThirdPersonCamera(Transform target) 
@@ -90,7 +170,8 @@ IEnumerator MoveCameraAlongPath() {
 ```
 ---
 
-### 三、FreeLook Camera 进阶
+**FreeLook Camera 进阶**
+
  **1. 环视系统结构**
 ```csharp
 // 三环配置参数
@@ -104,7 +185,7 @@ public float MiddleRig_Radius = 5f;
 public float BottomRig_Height = 0.5f;
 public float BottomRig_Radius = 3f;
 ```
-** 2. RPG 角色环视案例**
+**2. RPG 角色环视案例**
 ```csharp
 void ConfigureFreeLook(CinemachineFreeLook freelook) {
     // 基本设置
@@ -140,9 +221,9 @@ void EnterVehicle() {
 
 ---
 
-### 四、镜头混合系统
+### 二、镜头混合系统
 
-** 1. 过渡效果配置**
+**1. 过渡效果配置**
 
 | 混合类型      | 适用场景 | 参数示例                           |
 |-----------|------|--------------------------------|
@@ -162,7 +243,7 @@ public void SwitchToCamera(CinemachineVirtualCamera targetCam)
     StartCoroutine(OnCameraBlendComplete());
 }
 ```
-** 2. 分镜序列案例**
+**2. 分镜序列案例**
 ```csharp
 // 创建分镜序列
 public List<CinemachineVirtualCamera> sequence;
@@ -178,7 +259,7 @@ IEnumerator PlayCutscene() {
 }
 ```
 ---
-### 五、URP 高级扩展
+### 三、URP 高级扩展
  **1. Camera Stack 实战**
 ```csharp
 // 添加相机堆栈
@@ -225,29 +306,27 @@ void EnablePIP() {
     pipData.SetRenderer(1); // 使用指定渲染器
 }
 ```
----
-### 六、性能优化技巧
-**1. 预算控制：**
+
+### 四、性能优化技巧
+1. 预算控制：
 
 ```csharp
 // 限制同时激活的虚拟相机数量
 CinemachineCore.VirtualCameraCount = 5; 
 ```
-
-1. 精度分级：
+2. 精度分级：
 ```csharp
 // 根据距离降低更新频率
 vcam.m_UpdateInterval = distance > 20f ? 0.2f : 0.05f;
 ```
-1. 碰撞检测优化：
+3. 碰撞检测优化：
  ```csharp
 var collider = vcam.GetComponent<CinemachineCollider>();
 collider.m_Optimization = ColliderOptimization.FixedCache;
 collider.m_DistanceLimit = 10f; // 最大检测距离
 ```
 
-
-### 七、完整示例：BOSS战镜头系统
+### 五、完整示例：BOSS战镜头系统
 
 ```csharp
 public class BossFightCameraSystem : MonoBehaviour
@@ -300,7 +379,7 @@ public class BossFightCameraSystem : MonoBehaviour
 }
 ```
 
-### 使用建议：
+**使用建议：**
 1. 快捷键加速调试：
     - 场景视图按 Ctrl+` 显示Cinemachine调试信息
     - Virtual Camera对象上按F切换预览
