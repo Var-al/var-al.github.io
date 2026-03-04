@@ -10,7 +10,7 @@ url: http://localhost:4000
 # For a project page here should be a project name. Otherwise (for user's/organization's page leave it empty)
 baseurl: ''
 
-author: Pavel Makhov
+author: 阿罗
 copyright: 2015-2018
 
 share:
@@ -54,3 +54,6 @@ kramdown:
   hard_wrap: true
 
 exclude: ['README.md', 'LICENSE']
+
+future: true  # 强制渲染日期晚于当前时间的文章
+timezone: Asia/Shanghai # 统一时区为北京时间
