@@ -40,8 +40,38 @@
           </div>
         </div>
         {% include disqus-comments.html %}
+
+         
       </div>
       {% include footer.html %}
+
+      <div id="gitalk-container"></div>
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+    <script src="https://unpkg.com/gitalk@latest/dist/gitalk.min.js"></script>
+    <script src="/js/md5.min.js"></script>
+    <script type="text/javascript">
+         // 处理标签，过滤掉空值和无效值
+        var tagsString = '{{ page.tags | jsonify }}';  // 使用 jsonify 过滤器
+        var tags = JSON.parse(tagsString).filter(function(tag) {
+            return tag && tag.trim() !== '' && !tag.includes('/');  // 过滤掉包含斜杠的标签
+        });
+        var gitalk = new Gitalk({
+    clientID: 'Ov23livSuQOPE8S7ED8i',
+    clientSecret: 'e87fa78ec0f568a33e3aa68c6fdb8d07e4be4bab',
+    repo: 'var-al.github.io',    // 你的仓库名
+    owner: 'var-al',             // 你的 GitHub 用户名
+    admin: ['var-al'],           // 管理员数组
+    id: md5(location.href.match('/(?<=posts/)(.*)(?=/)/')[1]),  // 建议这样生成 ID，更稳定
+    title: '{{ page.title }}',
+    body: '文章链接：' + location.href,
+    labels: ['Gitalk'].concat(tags),
+    language: 'zh-CN',
+    perPage: 10,
+    distractionFreeMode: false,
+    createIssueManually: true    // 建议添加：手动创建 issue
+});
+        gitalk.render('gitalk-container');
+    </script>
     </div>
   </body>
 </html>
