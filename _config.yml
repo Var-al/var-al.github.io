@@ -39,7 +39,8 @@ yandex_metrica:
 # setting below must also be true. Individual posts can override 'comments' to
 # disable on a post-by-post basis
 disqus: streetturtle
-comments: true
+comments: false
+comment_provider: gitalk  # 可选: disqus, gitalk, none
 
 permalink: /:year/:month/:day/:title/
 
@@ -57,3 +58,11 @@ exclude: ['README.md', 'LICENSE']
 
 # future: true  # 强制渲染日期晚于当前时间的文章
 timezone: Asia/Shanghai # 统一时区为北京时间
+
+# Gitalk 配置
+gitalk:
+  clientID: 'Ov23livSuQOPE8S7ED8i'
+  clientSecret: 'e87fa78ec0f568a33e3aa68c6fdb8d07e4be4bab'
+  repo: 'var-al.github.io'
+  owner: 'var-al'
+  admin: ['var-al']
