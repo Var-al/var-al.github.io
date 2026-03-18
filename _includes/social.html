@@ -8,6 +8,24 @@
     </li>
   {% endif %}
 
+  <!-- 添加微信 -->
+  <li>
+    <a title="微信" href="javascript:void(0);" class="wechat-link">
+      <i class="fab fa-weixin fa-2x"></i>
+    </a>
+  </li>
+</ul>
+
+<!-- 微信弹窗 HTML - 放在侧边栏的末尾 -->
+<div id="wechat-modal" class="simple-modal">
+  <div class="modal-content">
+    <a href="javascript:void(0);" class="close-btn">&times;</a>
+    <h3>微信二维码</h3>
+    <img src="/assets/images/wechat.png" alt="微信二维码">
+    <p>扫码添加微信，备注"博客"</p>
+  </div>
+</div>
+
   <!-- {% if site.social.stackoverflow %}
     <li>
       <a title="{{ site.social.stackoverflow }} on StackOverflow" href="https://stackoverflow.com/users/{{ site.social.stackoverflow }}" target="_blank"><i class="fab fa-stack-overflow fa-2x"></i></a>
@@ -39,3 +57,156 @@
   {% endif %} -->
 
 </ul>
+<script>
+// 等待页面完全加载
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('微信弹窗脚本加载完成');
+    
+    // 1. 获取元素
+    var modal = document.getElementById('wechat-modal');
+    var trigger = document.querySelector('.wechat-link');
+    var closeBtn = document.querySelector('.close-btn');
+    
+    console.log('modal:', modal);
+    console.log('trigger:', trigger);
+    console.log('closeBtn:', closeBtn);
+    
+    // 2. 点击微信图标，打开弹窗
+    if (trigger) {
+        trigger.addEventListener('click', function(e) {
+            console.log('微信图标被点击了');
+            e.preventDefault();
+            e.stopPropagation();
+            if (modal) {
+                modal.style.display = 'block';
+                console.log('弹窗已显示');
+            }
+        });
+    }
+    
+    // 3. 点击关闭按钮，关闭弹窗
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
+    }
+    
+    // 4. 点击弹窗背景（半透明遮罩层），也关闭弹窗
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            console.log('点击了弹窗背景');
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+    }
+    
+    // 5. 按ESC键关闭弹窗
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
+});
+</script>
+
+<style>
+/* 简单弹窗样式 - 直接放在这里 */
+.simple-modal {
+    display: none; /* 默认隐藏 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); /* 半透明背景 */
+    z-index: 9999; /* 确保在最顶层 */
+}
+
+/* 弹窗内容 */
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* 关闭按钮 */
+.close-btn {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    color: #000;
+}
+
+/* 弹窗内图片 */
+.modal-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 15px auto;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+/* 弹窗内文字 */
+.modal-content h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.modal-content p {
+    color: #666;
+    margin: 10px 0 0 0;
+    font-size: 0.9em;
+}
+
+/* 暗色主题适配 */
+body.dark-theme .modal-content {
+    background: #2d2d2d;
+    color: #e0e0e0;
+}
+
+body.dark-theme .close-btn {
+    color: #bbb;
+}
+
+body.dark-theme .close-btn:hover {
+    color: #fff;
+}
+
+body.dark-theme .modal-content h3 {
+    color: #e0e0e0;
+}
+
+body.dark-theme .modal-content p {
+    color: #bbb;
+}
+
+body.dark-theme .modal-content img {
+    border-color: #555;
+}
+</style>
