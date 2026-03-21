@@ -4,7 +4,7 @@ title: Unity Build APK
 date:   2023-06-22 17:48
 description: Unity 打APK记录
 toc: true
-comments: false
+comments: true
 categories:
  - blog
 tags:
