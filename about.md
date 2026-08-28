@@ -16,4 +16,12 @@ Unity 开发者 | 健身者 | 正在学习如何真诚地生活
 - 关于躬行集： 算是一个私人的生活日志。记录那些真实发生过的事，还有那些当时想不明白、或者随手记下的瞬间。没什么修饰，就是想给自己的生活留个底。
 
 ### Slogan：
-**“不装了，去活。去感受真实的痛，也去接纳真实的自己。”**
+**”不装了，去活。去感受真实的痛，也去接纳真实的自己。”**
+
+---
+
+### 我的大五人格
+
+<div style='max-width: 440px; margin: 20px auto;'>
+<iframe src='https://bigfivepersonality.me/zh/embed/cxkiwhQs' width='100%' height='600' frameborder='0' scrolling='no' style='border: none; overflow: hidden;'></iframe>
+</div>

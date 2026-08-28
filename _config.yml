@@ -54,6 +54,7 @@ markdown: kramdown
 kramdown:
   input: GFM # Enable GitHub Flavored Markdown (fenced code blocks)
   hard_wrap: true
+  smart_quotes: ["apos", "apos", "quot", "quot"]
 
 exclude: ['README.md', 'LICENSE']
 
